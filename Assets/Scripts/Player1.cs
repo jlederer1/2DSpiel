@@ -38,12 +38,14 @@ public class Player1 : MonoBehaviour
     [SerializeField]
     private int woolBonus = 3;
     [SerializeField]
+    private Vector3 spawn_vec; 
 
    
     void Start()
     {
         // START POSITION 
-        transform.position = new Vector2(-1f, 1f);
+        spawn_vec = new Vector2(-1f, 1f);
+        transform.position = spawn_vec;
         // Enable double jump 
         doubleJump = true;
 
@@ -109,7 +111,7 @@ public class Player1 : MonoBehaviour
             Damage();
             Damage();
             // Teleport
-            transform.position = new Vector3(-1f, 1f);
+            transform.position = spawn_vec;
         }
 
     }
@@ -141,7 +143,7 @@ public class Player1 : MonoBehaviour
             {
                 Debug.LogError("Spawn_Manager not assigned.");
             }
-            
+
             // Destroy Player
             Destroy(this.gameObject);
         }
@@ -167,5 +169,11 @@ public class Player1 : MonoBehaviour
             received = _lives - lives;
         }
         Debug.Log("HEARTS +" + received);
+    }
+
+    public void SetSpawn(Vector3 vec)
+    {
+        Debug.Log(this.name + ": SetSpawn()");
+        spawn_vec = vec;
     }
 }

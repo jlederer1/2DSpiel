@@ -19,6 +19,7 @@ public class scroll : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Moves background, which teleports back after out of view
         transform.Translate(Vector2.right * backgroundSpeed * Time.deltaTime);
         if (transform.position.x > length)
         {
