@@ -4,29 +4,54 @@ using UnityEngine;
 
 public class Player1 : MonoBehaviour
 {   
-    // VARIABLES
+    // VARIABLES 
+
+    // -Movement
+    [SerializeField]
+    private Rigidbody2D RB;
     [SerializeField]
     private float _speed = 5f;
     [SerializeField]
     private float _jumpingSpeed = 10f;
 
-    [SerializeField]
-    private Rigidbody2D RB;
-    
-    // Jumping, time delay 
+    // -Jumping with time delay 
     private bool doubleJump;
     [SerializeField]
     private float _coolDownTime = 1f;
     private float _nextJumpTime = 0f;
-    // teleport
+
+    // -Teleport
     private float low_border = -20f;
 
-    // Start is called before the first frame update
+    // -UI with Lifebar and height score
+    [SerializeField]
+    public int _lives;
+    private int _maxLives;
+    public HealthBar healthBar;
+    public float _score;
+
+    // -Spawnmanager to trigger deconstruction 
+    [SerializeField]
+    private GameObject _spawnManager;
+
+    // -Item
+    [SerializeField]
+    private int woolBonus = 3;
+    [SerializeField]
+
+   
     void Start()
     {
         // START POSITION 
-        transform.position = new Vector2(0f, 1f);
+        transform.position = new Vector2(-1f, 1f);
+        // Enable double jump 
         doubleJump = true;
+
+        // Init lives, healthbar and height score of the player 
+        _maxLives = 9;
+        _lives = _maxLives;
+        healthBar.setMaxHealth(_maxLives);
+        _score = transform.position.y;
 
         // INIT RIGIDBODY 
         RB = GetComponent<Rigidbody2D>();
@@ -37,10 +62,19 @@ public class Player1 : MonoBehaviour
 
     }
 
-    // Update is called once per frame
     void Update()
     {
+        ScoreUpdate(); 
         PlayerMovement();
+    }
+
+    void ScoreUpdate()
+    {
+        // if highscore beaten:
+        if (_score < transform.position.y)
+        {   // update score 
+            _score = transform.position.y;
+        }
     }
 
     void PlayerMovement()
@@ -52,34 +86,86 @@ public class Player1 : MonoBehaviour
         // JUMPING
         if (Input.GetKeyDown("space") && _nextJumpTime < Time.time)
         {
+            // If double jump is currently disabled (cooldown):
             if (!doubleJump)
             {
                 doubleJump = true;
-                if (Time.time - _nextJumpTime < _coolDownTime)
-                {
-                    RB.velocity += new Vector2(0f, _jumpingSpeed/2); 
-                } 
-                else 
-                {
-                    RB.velocity += new Vector2(0f, _jumpingSpeed);
-                }
+                RB.velocity += new Vector2(0f, _jumpingSpeed);
                 _nextJumpTime = Time.time + _coolDownTime;  
             } 
+            // If double jump is currently enabled:
             else if (doubleJump)
             { 
                 doubleJump = false;
                 RB.velocity += new Vector2(0f, _jumpingSpeed);
-                _nextJumpTime = Time.time + (_coolDownTime / 10);
             }
         }
 
         // TELEPORT - if player is falling teleport him back to a certain position
         if (transform.position.y < low_border)
         {
-            transform.position = new Vector3(0f, 1f);
+            // Extra damage 
+            Damage();
+            Damage();
+            Damage();
+            // Teleport
+            transform.position = new Vector3(-1f, 1f);
         }
 
     }
-    
-    
+
+    public void Damage()
+    {
+        // Update health bar
+        _lives --;
+        Debug.Log("HEARTS -1");
+        healthBar.setHealth(_lives);
+        
+        // DEATH 
+        if (_lives == 0)
+        {
+            Debug.Log(this.name + "damaged: Death");
+
+            // DELETE ENEMYS IN HIERACHY
+            foreach (Transform child in _spawnManager.transform)
+            {
+                Destroy(child.gameObject);
+            }
+
+            // STOP SPAWNING
+            if (_spawnManager != null)
+            {
+                _spawnManager.GetComponent<ESpawnManager>().onPlayerDeath();
+            }
+            else
+            {
+                Debug.LogError("Spawn_Manager not assigned.");
+            }
+            
+            // Destroy Player
+            Destroy(this.gameObject);
+        }
+    }
+
+    // Triggered when item picked up
+    public void Wolle()
+    {
+        // Save old value 
+        int lives = _lives;
+        int received = 0;
+        // Add 3 lives (max 9 lives) 
+        // If less than 3 hearts are needed:
+        if (_lives < (9 - woolBonus))
+        {
+            _lives += woolBonus;
+            received = 3;
+        }
+        // If 3 lives are needed:
+        else 
+        {
+            _lives = 9;
+            received = _lives - lives;
+        }
+        Debug.Log("HEARTS +" + received);
+    }
 }

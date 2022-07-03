@@ -8,12 +8,6 @@ public class Enemy1 : MonoBehaviour
     [SerializeField]
     private float _enemySpeed = 0.1f; 
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -27,5 +21,14 @@ public class Enemy1 : MonoBehaviour
             transform.position = new Vector2(Random.Range(-10f, 10f), 20f);
         }
     }
-        
+    
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        // Damage Player on Collision 
+        if (other.CompareTag("Player"))
+        {
+            other.GetComponent<Player1>().Damage();
+        }
+    }
+
 }
