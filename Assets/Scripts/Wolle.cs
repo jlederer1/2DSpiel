@@ -35,8 +35,11 @@ public class Wolle : MonoBehaviour
     {
         if (mustPatrol) 
         {
-            // G roundDetect changes bool mustFlip, if end of wool's platform is reached 
-            mustFlip = !Physics2D.OverlapCircle(groundDetect.position, 0.1f, groundLayer);
+            // GroundDetect changes bool mustFlip, if end of wool's platform is reached 
+            if (groundDetect != null)
+            {
+                mustFlip = !Physics2D.OverlapCircle(groundDetect.position, 0.1f, groundLayer);
+            }
         }
     }
 
@@ -64,7 +67,10 @@ public class Wolle : MonoBehaviour
         {
             // Trigger Player's Wolle() function
             other.GetComponent<Player1>().Wolle();
-            Destroy(this.gameObject);
+            if (this.gameObject != null)
+            {
+               Destroy(this.gameObject); 
+            }
             Debug.Log("YOU GAINED WOOL: HEARTS +3!");
         }
     }
